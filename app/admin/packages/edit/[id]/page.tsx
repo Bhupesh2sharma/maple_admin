@@ -117,7 +117,7 @@ export default function EditPackage() {
 
       router.push("/admin/packages");
       router.refresh();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error:", error);
       setErrorMessage(error.message || "Something went wrong");
     } finally {

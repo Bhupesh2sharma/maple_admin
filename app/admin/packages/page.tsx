@@ -19,7 +19,7 @@ export default function PackageList() {
     setIsLoading(true);
     setErrorMessage("");
     try {
-      const response = await fetch("http://localhost:5000/api/packages");
+      const response = await fetch("https://maple-backend-two.vercel.app/api/packages");
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Failed to fetch packages");
       setPackages(data);
@@ -33,7 +33,7 @@ export default function PackageList() {
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this package?")) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/packages/${id}`, {
+      const response = await fetch(`https://maple-backend-two.vercel.app/api/packages/${id}`, {
         method: "DELETE",
       });
       if (!response.ok) throw new Error("Failed to delete package");
