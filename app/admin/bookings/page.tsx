@@ -8,7 +8,7 @@ export default function BookingsPage() {
 
   // Fetch all bookings
   useEffect(() => {
-    fetch("http://localhost:5000/api/bookings")
+    fetch("https://localhost:5000/api/bookings")
       .then((res) => res.json())
       .then((data) => setBookings(data))
       .catch((err) => console.error("Error fetching bookings:", err));
