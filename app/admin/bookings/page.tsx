@@ -8,7 +8,7 @@ export default function BookingsPage() {
 
   // Fetch all bookings
   useEffect(() => {
-    fetch("https://localhost:5000/api/bookings")
+    fetch("https://maple-backend-two.vercel.app/api/bookings")
       .then((res) => res.json())
       .then((data) => setBookings(data))
       .catch((err) => console.error("Error fetching bookings:", err));
@@ -19,7 +19,7 @@ export default function BookingsPage() {
     const newStatus = currentStatus === "Confirmed" ? "Not Confirmed" : "Confirmed";
 
     try {
-      const res = await fetch(`http://localhost:3000/api/bookings/${id}`, {
+      const res = await fetch(`https://maple-backend-two.vercel.app/bookings/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),

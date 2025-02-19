@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import React from "react";
 
 const AdminAvailability = () => {
     const [date, setDate] = useState("");
@@ -28,8 +29,8 @@ const AdminAvailability = () => {
     }, []);
 
     // Handle form submission
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
         try {
             const response = await fetch("http://localhost:5000/api/availability/set", {
                 method: "POST",
