@@ -119,7 +119,7 @@ export default function EditPackage() {
       router.refresh();
     } catch (error: unknown) {
       console.error("Error:", error);
-      setErrorMessage(error.message || "Something went wrong");
+    
     } finally {
       setIsLoading(false);
     }
