@@ -23,7 +23,6 @@ export default function UsersPage() {
       })
       .catch((err) => console.error("Error fetching users:", err));
   }, []);
-  const val =0;
 
   return (
     <div className="space-y-6">
