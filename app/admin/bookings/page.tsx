@@ -2,16 +2,35 @@
 import { useEffect, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
+// ✅ Define the expected structure of a booking
+interface Booking {
+  _id: string;
+  package: string;
+  travelDate: string;
+  adults: number;
+  children: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  status?: string;
+}
+
 export default function BookingsPage() {
-  const [bookings, setBookings] = useState([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
 
   // Fetch all bookings
   useEffect(() => {
     fetch("https://maplesserver.vercel.app/api/booking")
       .then((res) => res.json())
       .then((response) => {
-        console.log("Fetched data:", response); // Debugging API response
-        setBookings(Array.isArray(response.data) ? response.data : []);
+        console.log("Fetched data:", response);
+        if (Array.isArray(response.data)) {
+          setBookings(response.data);
+        } else {
+          console.error("Unexpected API Response Format:", response);
+          setBookings([]);
+        }
       })
       .catch((err) => console.error("Error fetching bookings:", err));
   }, []);
