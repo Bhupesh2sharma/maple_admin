@@ -3,8 +3,17 @@
 import { useEffect, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
+// ✅ Define User Type
+interface User {
+  _id: string;
+  firstName: string;
+  email: string;
+  phone: string;
+  role: string;
+}
+
 export default function UsersPage() {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   // Fetch all users
   useEffect(() => {
@@ -18,7 +27,7 @@ export default function UsersPage() {
           setUsers(data.data);
         } else {
           console.error("Unexpected API Response Format:", data);
-          setUsers([]);
+          setUsers([]); 
         }
       })
       .catch((err) => console.error("Error fetching users:", err));
@@ -30,7 +39,7 @@ export default function UsersPage() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>User ID</TableHead>
+            <TableHead>#</TableHead> {/* Auto-incrementing Index */}
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Phone</TableHead>
@@ -38,17 +47,24 @@ export default function UsersPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-  {users.map((user, index) => (
-    <TableRow key={user._id}>
-      <TableCell>{index + 1}</TableCell> {/* Auto-incrementing User ID */}
-      <TableCell>{user.firstName}</TableCell>
-      <TableCell>{user.email}</TableCell>
-      <TableCell>{user.phone}</TableCell>
-      <TableCell>{user.role}</TableCell>
-    </TableRow>
-  ))}
-</TableBody>
-
+          {users.length > 0 ? (
+            users.map((user, index) => (
+              <TableRow key={user._id}>
+                <TableCell>{index + 1}</TableCell> {/* Auto-incrementing User ID */}
+                <TableCell>{user.firstName}</TableCell>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>{user.phone}</TableCell>
+                <TableCell>{user.role}</TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center">
+                No users found.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
       </Table>
     </div>
   );
