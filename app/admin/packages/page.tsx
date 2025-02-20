@@ -3,8 +3,17 @@
 import { useEffect, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
+// ✅ Define the expected package structure
+interface Package {
+  _id: string;
+  title: string;
+  price: number;
+  description: string;
+  duration: string;
+}
+
 export default function BookingsPage() {
-  const [packages, setPackages] = useState([]);
+  const [packages, setPackages] = useState<Package[]>([]);
 
   // Fetch all packages
   useEffect(() => {
@@ -13,17 +22,16 @@ export default function BookingsPage() {
       .then((data) => {
         console.log("API Response:", data);
         if (Array.isArray(data)) {
-          setPackages(data); // ✅ If it's an array, set it directly
+          setPackages(data);
         } else if (data.data && Array.isArray(data.data)) {
-          setPackages(data.data); // ✅ If response is { data: [...] }, set packages to data.data
+          setPackages(data.data);
         } else {
           console.error("Unexpected API Response Format:", data);
-          setPackages([]); // ⛔ Prevent breaking UI by setting an empty array
+          setPackages([]);
         }
       })
       .catch((err) => console.error("Error fetching packages:", err));
   }, []);
-  
 
   return (
     <div className="space-y-6">
@@ -35,7 +43,7 @@ export default function BookingsPage() {
             <TableHead>Name</TableHead>
             <TableHead>Price</TableHead>
             <TableHead>Description</TableHead>
-            <TableHead>Duration</TableHead>
+            <TableHead>Duration(Days)</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -45,7 +53,7 @@ export default function BookingsPage() {
               <TableCell>{pkg.title}</TableCell>
               <TableCell>{pkg.price}</TableCell>
               <TableCell>{pkg.description}</TableCell>
-              <TableCell>{pkg.duration}</TableCell>
+              <TableCell>{pkg.duration} </TableCell>
             </TableRow>
           ))}
         </TableBody>
