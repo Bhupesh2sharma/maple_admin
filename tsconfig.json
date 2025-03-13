@@ -31,7 +31,8 @@
     "strictBindCallApply": false,
     "strictPropertyInitialization": false,
     "noImplicitThis": false,
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    "noEmit": true
   },
   "include": [
     "next-env.d.ts",

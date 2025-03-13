@@ -79,53 +79,12 @@ export default function ContactFormsPage() {
       responded: 'bg-purple-100 text-purple-800'
     };
 
-    return (
-      <Badge 
-        className={`${statusStyles[status as keyof typeof statusStyles]} cursor-pointer`}
-        onClick={() => {
-          const nextStatus = {
-            new: 'read',
-            read: 'responded',
-            responded: 'new'
-          }[status as keyof typeof nextStatus];
-          handleStatusUpdate(contact._id, nextStatus);
-        }}
-      >
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </Badge>
-    );
-  };
-
-  const ContactRow = ({ contact }: { contact: Contact }) => {
-    return (
-      <TableRow>
-        <TableCell>{contact.firstName} {contact.lastName}</TableCell>
-        <TableCell>{contact.email}</TableCell>
-        <TableCell>{contact.phone}</TableCell>
-        <TableCell>{contact.message}</TableCell>
-        <TableCell>
-          <select
-            value={contact.status}
-            onChange={(e) => {
-              const status = e.target.value;
-              const nextStatus = {
-                new: 'read',
-                read: 'responded',
-                responded: 'new'
-              }[status as keyof typeof nextStatus];
-              handleStatusUpdate(contact._id, nextStatus);
-            }}
-          >
-            {status.charAt(0).toUpperCase() + status.slice(1)}
-          </select>
-        </TableCell>
-      </TableRow>
-    );
+  
   };
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center"></div>
         <h1 className="text-3xl font-bold">Contact Form Submissions</h1>
         <Badge variant="outline">
           Total: {contacts.length}
@@ -156,7 +115,53 @@ export default function ContactFormsPage() {
                 </TableRow>
               ) : (
                 contacts.map((contact) => (
-                  <ContactRow key={contact._id} contact={contact} />
+                  <TableRow key={contact._id}>
+                    <TableCell>
+                      {contact.firstName} {contact.lastName}
+                    </TableCell>
+                    <TableCell>
+                      <a 
+                        href={`mailto:${contact.email}`}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        {contact.email}
+                      </a>
+                    </TableCell>
+                    <TableCell>
+                      <a 
+                        href={`tel:${contact.phone}`}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        {contact.phone}
+                      </a>
+                    </TableCell>
+                    <TableCell className="max-w-xs">
+                      <p className="truncate" title={contact.message}>
+                        {contact.message}
+                      </p>
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(contact.createdAt), 'MMM dd, yyyy')}
+                    </TableCell>
+                    <TableCell>
+                      <select
+                        value={contact.status}
+                        onChange={(e) => {
+                          const status = e.target.value;
+                          const nextStatus = {
+                            new: 'read',
+                            read: 'responded',
+                            responded: 'new'
+                          }[status as keyof typeof nextStatus];
+                          handleStatusUpdate(contact._id, nextStatus);
+                        }}
+                      >
+                        <option value={contact.status}>
+                          {contact.status.charAt(0).toUpperCase() + contact.status.slice(1)}
+                        </option>
+                      </select>
+                    </TableCell>
+                  </TableRow>
                 ))
               )}
             </TableBody>
