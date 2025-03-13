@@ -34,11 +34,32 @@ interface Package {
   active: boolean;
 }
 
+interface PackageFormData {
+  title: string;
+  description: string;
+  destination: string;
+  price: {
+    amount: number;
+    currency: string;
+  };
+  duration: {
+    days: number;
+    nights: number;
+  };
+  itinerary: { day: number; title: string; description: string }[];
+  inclusions: string[];
+  exclusions: string[];
+  cancellationPolicy: string;
+  featured: boolean;
+  active: boolean;
+  images: File[];
+}
+
 export default function PackagesPage() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<PackageFormData>({
     title: "",
     description: "",
     destination: "",
@@ -61,10 +82,11 @@ export default function PackagesPage() {
     exclusions: [""],
     cancellationPolicy: "",
     featured: false,
-    active: true
+    active: true,
+    images: []
   });
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
-  const [images, setImages] = useState<FileList | null>(null);
+  const [images, setImages] = useState<File[]>([]);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
 
   // Fetch Packages
@@ -89,111 +111,44 @@ export default function PackagesPage() {
     }
   };
 
-  // Create/Update Package
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
     
-    try {
-      const token = localStorage.getItem("adminToken");
-      
-      // Structure the package data to match the backend schema
-      const packageData = {
-        title: formData.get("title") as string,
-        description: formData.get("description") as string,
-        destination: formData.get("destination") as string,
-        price: {
-          amount: Number(formData.get("price.amount")),
-          currency: formData.get("price.currency") as string || "₹"
-        },
-        duration: {
-          days: Number(formData.get("duration.days")),
-          nights: Number(formData.get("duration.days")) - 1
-        },
-        itinerary: JSON.parse(formData.get("itinerary") as string),
-        inclusions: JSON.parse(formData.get("inclusions") as string),
-        exclusions: JSON.parse(formData.get("exclusions") as string),
-        cancellationPolicy: formData.get("cancellationPolicy") as string,
-        featured: false,
-        active: true
-      };
-
-      // Log the structured data for debugging
-      console.log('Structured package data:', packageData);
-
-      // Append the stringified package data
-      formData.append("packageData", JSON.stringify(packageData));
-
-      // Handle image files (maximum 3)
-      const imageInput = document.querySelector('input[name="images"]');
-      if (imageInput?.files && imageInput.files.length > 0) {
-        Array.from(imageInput.files).forEach((file) => {
-          formData.append("images", file);
-        });
-      }
-
-      // Handle PDF file
-      const pdfInput = document.querySelector('input[name="pdfBrochure"]');
-      if (pdfInput?.files?.[0]) {
-        formData.append("pdfBrochure", pdfInput.files[0]);
-      }
-
-      const url = selectedPackage 
-        ? `https://maple-server-e7ye.onrender.com/api/packages/${selectedPackage._id}`
-        : "https://maple-server-e7ye.onrender.com/api/packages";
-
-      // Log the final FormData (for debugging)
-      for (let pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
-      }
-
-      const response = await fetch(url, {
-        method: selectedPackage ? "PUT" : "POST",
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      });
-
-      const responseData = await response.json();
-      console.log('Response:', responseData);
-
-      if (!response.ok) {
-        throw new Error(responseData.message || 'Failed to save package');
-      }
-
-      toast.success(selectedPackage ? "Package updated successfully" : "Package created successfully");
-      setShowForm(false);
-      setSelectedPackage(null);
-      resetForm();
-      fetchPackages();
-    } catch (error) {
-      console.error("Error saving package:", error);
-      toast.error(error.message || "Error saving package");
-    }
+    // Convert FileList to Array and store it
+    const fileArray = Array.from(e.target.files);
+    setImages(fileArray);
   };
 
-  // Helper function to reset form
-  const resetForm = () => {
-    setFormData({
-      title: "",
-      description: "",
-      destination: "",
-      price: { amount: 0, currency: "₹" },
-      duration: { days: 0, nights: 0 },
-      itinerary: [
-        {
-          day: 1,
-          title: "",
-          description: ""
-        }
-      ],
-      inclusions: [""],
-      exclusions: [""],
-      cancellationPolicy: "",
-      featured: false,
-      active: true
-    });
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    try {
+      const formData = new FormData();
+      
+      // Add other form fields to formData
+      // ... 
+
+      // Add all images to formData
+      images.forEach((image, index) => {
+        formData.append(`images`, image);
+      });
+
+      const response = await fetch('your-api-endpoint', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        toast.success('Package created successfully');
+        // Reset form or redirect
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      toast.error('Failed to create package');
+    }
   };
 
   // Delete Package
@@ -250,13 +205,6 @@ export default function PackagesPage() {
         }
       ]
     }));
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      // ... rest of your image upload logic
-    }
   };
 
   const PackageCards = () => {
@@ -404,7 +352,6 @@ export default function PackagesPage() {
                   <label className="block mb-1">Title</label>
                   <input
                     type="text"
-                    name="title"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     className="w-full p-2 border rounded"
@@ -415,7 +362,6 @@ export default function PackagesPage() {
                 <div>
                   <label className="block mb-1">Description</label>
                   <textarea
-                    name="description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     className="w-full p-2 border rounded"
@@ -427,7 +373,6 @@ export default function PackagesPage() {
                   <label className="block mb-1">Destination</label>
                   <input
                     type="text"
-                    name="destination"
                     value={formData.destination}
                     onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
                     className="w-full p-2 border rounded"
@@ -440,7 +385,6 @@ export default function PackagesPage() {
                     <label className="block mb-1">Price</label>
                     <input
                       type="number"
-                      name="price.amount"
                       value={formData.price.amount}
                       onChange={(e) => setFormData({
                         ...formData,
@@ -454,7 +398,6 @@ export default function PackagesPage() {
                     <label className="block mb-1">Days</label>
                     <input
                       type="number"
-                      name="duration.days"
                       value={formData.duration.days}
                       onChange={(e) => setFormData({
                         ...formData,
@@ -474,7 +417,6 @@ export default function PackagesPage() {
                         <label className="block mb-1">Day {day.day} Title</label>
                         <input
                           type="text"
-                          name={`itinerary.${index}.title`}
                           value={day.title}
                           onChange={(e) => handleItineraryChange(index, 'title', e.target.value)}
                           className="w-full p-2 border rounded"
@@ -484,7 +426,6 @@ export default function PackagesPage() {
                       <div>
                         <label className="block mb-1">Description</label>
                         <textarea
-                          name={`itinerary.${index}.description`}
                           value={day.description}
                           onChange={(e) => handleItineraryChange(index, 'description', e.target.value)}
                           className="w-full p-2 border rounded"
@@ -509,14 +450,30 @@ export default function PackagesPage() {
                     name="images"
                     multiple
                     accept="image/*"
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      if (e.target.files && e.target.files.length > 3) {
-                        toast.error("Maximum 3 images allowed");
-                        e.target.value = "";
-                      }
-                    }}
+                    onChange={handleImageUpload}
                     className="w-full p-2 border rounded"
                   />
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                  {images.map((image, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={URL.createObjectURL(image)}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-32 object-cover rounded"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImages(images.filter((_, i) => i !== index));
+                        }}
+                        className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
                 </div>
 
                 <div>
