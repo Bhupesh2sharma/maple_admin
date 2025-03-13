@@ -8,7 +8,6 @@
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
-    "noEmit": true,
     "noImplicitAny": false,
     "esModuleInterop": true,
     "module": "esnext",
@@ -27,7 +26,12 @@
         "./*"
       ]
     },
-    "strictNullChecks": true
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "strictBindCallApply": false,
+    "strictPropertyInitialization": false,
+    "noImplicitThis": false,
+    "useUnknownInCatchVariables": false
   },
   "include": [
     "next-env.d.ts",

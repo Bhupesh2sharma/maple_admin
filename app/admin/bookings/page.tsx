@@ -40,7 +40,7 @@ export default function BookingsPage() {
 
   const fetchBookings = async () => {
     try {
-      const token = localStorage.getItem('adminToken'); // Assuming you store admin token
+      const token = localStorage.getItem('adminToken');
       const response = await fetch("https://maple-server-e7ye.onrender.com/api/bookings", {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -54,8 +54,8 @@ export default function BookingsPage() {
       } else {
         toast.error(data.message || 'Failed to fetch bookings');
       }
-    } catch (error) {
-      console.error("Error fetching bookings:", error);
+    } catch (err) {
+      console.error("Error fetching bookings:", err);
       toast.error('Failed to load bookings');
     } finally {
       setLoading(false);
