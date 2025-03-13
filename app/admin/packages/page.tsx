@@ -90,34 +90,30 @@ export default function PackagesPage() {
   };
 
   // Create/Update Package
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const token = localStorage.getItem("adminToken");
+    const formData = new FormData(e.currentTarget);
     
     try {
-      const formDataToSend = new FormData();
+      const token = localStorage.getItem("adminToken");
       
       // Structure the package data to match the backend schema
       const packageData = {
-        title: formData.title,
-        description: formData.description,
-        destination: formData.destination,
+        title: formData.get("title") as string,
+        description: formData.get("description") as string,
+        destination: formData.get("destination") as string,
         price: {
-          amount: Number(formData.price.amount),
-          currency: formData.price.currency || "₹"
+          amount: Number(formData.get("price.amount")),
+          currency: formData.get("price.currency") as string || "₹"
         },
         duration: {
-          days: Number(formData.duration.days),
-          nights: Number(formData.duration.days) - 1
+          days: Number(formData.get("duration.days")),
+          nights: Number(formData.get("duration.days")) - 1
         },
-        itinerary: formData.itinerary.map((item, index) => ({
-          day: index + 1,
-          title: item.title,
-          description: item.description
-        })),
-        inclusions: formData.inclusions.filter(item => item.trim() !== ""),
-        exclusions: formData.exclusions.filter(item => item.trim() !== ""),
-        cancellationPolicy: formData.cancellationPolicy,
+        itinerary: JSON.parse(formData.get("itinerary") as string),
+        inclusions: JSON.parse(formData.get("inclusions") as string),
+        exclusions: JSON.parse(formData.get("exclusions") as string),
+        cancellationPolicy: formData.get("cancellationPolicy") as string,
         featured: false,
         active: true
       };
@@ -126,20 +122,20 @@ export default function PackagesPage() {
       console.log('Structured package data:', packageData);
 
       // Append the stringified package data
-      formDataToSend.append("packageData", JSON.stringify(packageData));
+      formData.append("packageData", JSON.stringify(packageData));
 
       // Handle image files (maximum 3)
       const imageInput = document.querySelector('input[name="images"]');
       if (imageInput?.files && imageInput.files.length > 0) {
         Array.from(imageInput.files).forEach((file) => {
-          formDataToSend.append("images", file);
+          formData.append("images", file);
         });
       }
 
       // Handle PDF file
       const pdfInput = document.querySelector('input[name="pdfBrochure"]');
       if (pdfInput?.files?.[0]) {
-        formDataToSend.append("pdfBrochure", pdfInput.files[0]);
+        formData.append("pdfBrochure", pdfInput.files[0]);
       }
 
       const url = selectedPackage 
@@ -147,7 +143,7 @@ export default function PackagesPage() {
         : "https://maple-server-e7ye.onrender.com/api/packages";
 
       // Log the final FormData (for debugging)
-      for (let pair of formDataToSend.entries()) {
+      for (let pair of formData.entries()) {
         console.log(pair[0], pair[1]);
       }
 
@@ -156,7 +152,7 @@ export default function PackagesPage() {
         headers: {
           'Authorization': `Bearer ${token}`
         },
-        body: formDataToSend
+        body: formData
       });
 
       const responseData = await response.json();
@@ -254,6 +250,13 @@ export default function PackagesPage() {
         }
       ]
     }));
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      // ... rest of your image upload logic
+    }
   };
 
   const PackageCards = () => {
@@ -401,6 +404,7 @@ export default function PackagesPage() {
                   <label className="block mb-1">Title</label>
                   <input
                     type="text"
+                    name="title"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     className="w-full p-2 border rounded"
@@ -411,6 +415,7 @@ export default function PackagesPage() {
                 <div>
                   <label className="block mb-1">Description</label>
                   <textarea
+                    name="description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     className="w-full p-2 border rounded"
@@ -422,6 +427,7 @@ export default function PackagesPage() {
                   <label className="block mb-1">Destination</label>
                   <input
                     type="text"
+                    name="destination"
                     value={formData.destination}
                     onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
                     className="w-full p-2 border rounded"
@@ -434,6 +440,7 @@ export default function PackagesPage() {
                     <label className="block mb-1">Price</label>
                     <input
                       type="number"
+                      name="price.amount"
                       value={formData.price.amount}
                       onChange={(e) => setFormData({
                         ...formData,
@@ -447,6 +454,7 @@ export default function PackagesPage() {
                     <label className="block mb-1">Days</label>
                     <input
                       type="number"
+                      name="duration.days"
                       value={formData.duration.days}
                       onChange={(e) => setFormData({
                         ...formData,
@@ -466,6 +474,7 @@ export default function PackagesPage() {
                         <label className="block mb-1">Day {day.day} Title</label>
                         <input
                           type="text"
+                          name={`itinerary.${index}.title`}
                           value={day.title}
                           onChange={(e) => handleItineraryChange(index, 'title', e.target.value)}
                           className="w-full p-2 border rounded"
@@ -475,6 +484,7 @@ export default function PackagesPage() {
                       <div>
                         <label className="block mb-1">Description</label>
                         <textarea
+                          name={`itinerary.${index}.description`}
                           value={day.description}
                           onChange={(e) => handleItineraryChange(index, 'description', e.target.value)}
                           className="w-full p-2 border rounded"
@@ -499,7 +509,7 @@ export default function PackagesPage() {
                     name="images"
                     multiple
                     accept="image/*"
-                    onChange={(e) => {
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       if (e.target.files && e.target.files.length > 3) {
                         toast.error("Maximum 3 images allowed");
                         e.target.value = "";
