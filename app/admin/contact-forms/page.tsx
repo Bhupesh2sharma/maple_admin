@@ -96,6 +96,33 @@ export default function ContactFormsPage() {
     );
   };
 
+  const ContactRow = ({ contact }: { contact: Contact }) => {
+    return (
+      <TableRow>
+        <TableCell>{contact.firstName} {contact.lastName}</TableCell>
+        <TableCell>{contact.email}</TableCell>
+        <TableCell>{contact.phone}</TableCell>
+        <TableCell>{contact.message}</TableCell>
+        <TableCell>
+          <select
+            value={contact.status}
+            onChange={(e) => {
+              const status = e.target.value;
+              const nextStatus = {
+                new: 'read',
+                read: 'responded',
+                responded: 'new'
+              }[status as keyof typeof nextStatus];
+              handleStatusUpdate(contact._id, nextStatus);
+            }}
+          >
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+          </select>
+        </TableCell>
+      </TableRow>
+    );
+  };
+
   return (
     <div className="space-y-6 p-6">
       <div className="flex justify-between items-center">
@@ -129,38 +156,7 @@ export default function ContactFormsPage() {
                 </TableRow>
               ) : (
                 contacts.map((contact) => (
-                  <TableRow key={contact._id}>
-                    <TableCell>
-                      {contact.firstName} {contact.lastName}
-                    </TableCell>
-                    <TableCell>
-                      <a 
-                        href={`mailto:${contact.email}`}
-                        className="text-blue-600 hover:text-blue-800"
-                      >
-                        {contact.email}
-                      </a>
-                    </TableCell>
-                    <TableCell>
-                      <a 
-                        href={`tel:${contact.phone}`}
-                        className="text-blue-600 hover:text-blue-800"
-                      >
-                        {contact.phone}
-                      </a>
-                    </TableCell>
-                    <TableCell className="max-w-xs">
-                      <p className="truncate" title={contact.message}>
-                        {contact.message}
-                      </p>
-                    </TableCell>
-                    <TableCell>
-                      {format(new Date(contact.createdAt), 'MMM dd, yyyy')}
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(contact.status)}
-                    </TableCell>
-                  </TableRow>
+                  <ContactRow key={contact._id} contact={contact} />
                 ))
               )}
             </TableBody>
