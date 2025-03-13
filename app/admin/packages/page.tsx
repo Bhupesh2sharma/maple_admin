@@ -96,27 +96,51 @@ export default function PackagesPage() {
 
   const fetchPackages = async () => {
     try {
-      const response = await fetch("https://maple-server-e7ye.onrender.com/api/packages");
+      const response = await fetch('/api/packages');
       const data = await response.json();
       if (data.success) {
-          setPackages(data.data);
-        } else {
+        setPackages(data.data);
+      } else {
         toast.error("Failed to fetch packages");
       }
-    } catch (error) {
-      console.error("Error fetching packages:", error);
-      toast.error("Error loading packages");
+    } catch (err) {
+      console.error('Error fetching packages:', err);
+      toast.error('Failed to fetch packages');
     } finally {
       setLoading(false);
     }
   };
 
+  const editPackage = (pkg: Package) => {
+    // Convert Package to PackageFormData format
+    const formData: PackageFormData = {
+      title: pkg.title,
+      description: pkg.description,
+      destination: pkg.destination,
+      price: pkg.price,
+      duration: pkg.duration,
+      itinerary: pkg.itinerary,
+      inclusions: pkg.inclusions,
+      exclusions: pkg.exclusions,
+      cancellationPolicy: pkg.cancellationPolicy,
+      featured: pkg.featured,
+      active: pkg.active,
+      images: [] // Reset images array since we can't convert URLs to Files
+    };
+    
+    setFormData(formData); // Now this should work without type errors
+    // Set any other state needed for editing mode
+    setSelectedPackage(pkg);
+  };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     
-    // Convert FileList to Array and store it
     const fileArray = Array.from(e.target.files);
-    setImages(fileArray);
+    setFormData(prev => ({
+      ...prev,
+      images: [...prev.images, ...fileArray]
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -129,9 +153,7 @@ export default function PackagesPage() {
       // ... 
 
       // Add all images to formData
-      images.forEach((image, index) => {
-        formData.append(`images`, image);
-      });
+      formData.append("images", images[0]);
 
       const response = await fetch('your-api-endpoint', {
         method: 'POST',
@@ -299,8 +321,7 @@ export default function PackagesPage() {
                   <div className="flex space-x-2">
                     <Button
                       onClick={() => {
-                        setSelectedPackage(pkg);
-                        setFormData(pkg);
+                        editPackage(pkg);
                         setShowForm(true);
                       }}
                       size="sm"
@@ -531,8 +552,7 @@ export default function PackagesPage() {
                   <div className="flex space-x-2">
                     <Button
                       onClick={() => {
-                        setSelectedPackage(pkg);
-                        setFormData(pkg);
+                        editPackage(pkg);
                         setShowForm(true);
                       }}
                       size="sm"
