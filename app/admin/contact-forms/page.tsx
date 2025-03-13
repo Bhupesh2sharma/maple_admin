@@ -84,11 +84,14 @@ export default function ContactFormsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex justify-between items-center"></div>
+      <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Contact Form Submissions</h1>
-        <Badge variant="outline">
-          Total: {contacts.length}
-        </Badge>
+        <button
+          onClick={() => fetchContacts()}
+          className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark"
+        >
+          Refresh
+        </button>
       </div>
 
       {loading ? (
@@ -107,62 +110,39 @@ export default function ContactFormsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {contacts.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
-                    No contact submissions found
+              {contacts.map((contact) => (
+                <TableRow key={contact._id}>
+                  <TableCell>{contact.firstName} {contact.lastName}</TableCell>
+                  <TableCell>{contact.email}</TableCell>
+                  <TableCell>{contact.phone}</TableCell>
+                  <TableCell>{contact.message}</TableCell>
+                  <TableCell>{format(new Date(contact.createdAt), 'MMM dd, yyyy')}</TableCell>
+                  <TableCell>
+                    <select
+                      value={contact.status}
+                      onChange={(e) => {
+                        const status = e.target.value;
+                        const nextStatus = {
+                          new: 'read',
+                          read: 'responded',
+                          responded: 'new'
+                        }[status as keyof typeof nextStatus];
+                        handleStatusUpdate(contact._id, nextStatus);
+                      }}
+                    >
+                      <option value={contact.status}>
+                        {contact.status.charAt(0).toUpperCase() + contact.status.slice(1)}
+                      </option>
+                    </select>
                   </TableCell>
                 </TableRow>
-              ) : (
-                contacts.map((contact) => (
-                  <TableRow key={contact._id}>
-                    <TableCell>
-                      {contact.firstName} {contact.lastName}
-                    </TableCell>
-                    <TableCell>
-                      <a 
-                        href={`mailto:${contact.email}`}
-                        className="text-blue-600 hover:text-blue-800"
-                      >
-                        {contact.email}
-                      </a>
-                    </TableCell>
-                    <TableCell>
-                      <a 
-                        href={`tel:${contact.phone}`}
-                        className="text-blue-600 hover:text-blue-800"
-                      >
-                        {contact.phone}
-                      </a>
-                    </TableCell>
-                    <TableCell className="max-w-xs">
-                      <p className="truncate" title={contact.message}>
-                        {contact.message}
-                      </p>
-                    </TableCell>
-                    <TableCell>
-                      {format(new Date(contact.createdAt), 'MMM dd, yyyy')}
-                    </TableCell>
-                    <TableCell>
-                      <select
-                        value={contact.status}
-                        onChange={(e) => {
-                          const status = e.target.value;
-                          const nextStatus = {
-                            new: 'read',
-                            read: 'responded',
-                            responded: 'new'
-                          }[status as keyof typeof nextStatus];
-                          handleStatusUpdate(contact._id, nextStatus);
-                        }}
-                      >
-                        <option value={contact.status}>
-                          {contact.status.charAt(0).toUpperCase() + contact.status.slice(1)}
-                        </option>
-                      </select>
-                    </TableCell>
-                  </TableRow>
-                ))
+              ))}
+              {contacts.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-4">
+                    No contact form submissions found.
+                  </TableCell>
+                </TableRow>
               )}
             </TableBody>
           </Table>
