@@ -24,7 +24,7 @@ export default function AdminLogin() {
         autoClose: 3000
       });
     }
-  }, []);
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,9 +57,9 @@ export default function AdminLogin() {
         setError(data.message || "Invalid credentials");
         toast.error("Login failed. Please check your credentials.");
       }
-    } catch (error) {
-      setError("Something went wrong. Please try again.");
-      toast.error("Server error. Please try again later.");
+    } catch (err) {
+      console.error("Error fetching data:", err);
+      toast.error('Failed to load data');
     } finally {
       setLoading(false);
     }

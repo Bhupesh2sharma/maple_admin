@@ -13,12 +13,7 @@ import {
   Moon,
   Sun,
   LogOut,
-  Mail,
-  Bell,
-  Shield,
   Palette,
-  Globe,
-  User
 } from "lucide-react"
 
 interface Settings {
@@ -73,8 +68,9 @@ export default function SettingsPage() {
       // Save settings to backend/localStorage
       localStorage.setItem('adminSettings', JSON.stringify(settings));
       toast.success('Settings saved successfully');
-    } catch (error) {
-      toast.error('Failed to save settings');
+    } catch (err) {
+      console.error("Error updating settings:", err);
+      toast.error('Failed to update settings');
     }
   };
 
