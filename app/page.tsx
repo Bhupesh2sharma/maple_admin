@@ -12,13 +12,30 @@ export default function AdminLogin() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const checkServerStatus = async () => {
+    try {
+      const response = await fetch('https://maple-server-e7ye.onrender.com/api/health', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        toast.warning('Server might be experiencing issues. Login may be delayed.');
+      }
+    } catch (err) {
+      toast.error('Server appears to be offline. Please try again later.');
+    }
+  };
+
   useEffect(() => {
     // Check for existing admin session
     const token = localStorage.getItem("adminToken");
     if (token) {
       router.push("/admin");
     } else {
-      // Show welcome back message if returning to login page
+      checkServerStatus(); // Check server status when component mounts
       toast.info("Welcome back! Please login to continue", {
         position: "top-right",
         autoClose: 3000
@@ -32,13 +49,21 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
+      // Add timeout to the fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch('https://maple-server-e7ye.onrender.com/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({ email, password }),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       const data = await response.json();
 
@@ -54,12 +79,22 @@ export default function AdminLogin() {
           onClose: () => router.push("/admin")
         });
       } else {
-        setError(data.message || "Invalid credentials");
-        toast.error("Login failed. Please check your credentials.");
+        throw new Error(data.message || "Invalid credentials");
       }
     } catch (err) {
-      console.error("Error fetching data:", err);
-      toast.error('Failed to load data');
+      console.error("Error during login:", err);
+      
+      // More specific error messages based on the error type
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        toast.error('Unable to connect to the server. Please check your internet connection or try again later.');
+        setError('Connection error - Server might be down or unreachable');
+      } else if (err instanceof DOMException && err.name === 'AbortError') {
+        toast.error('Request timed out. Please try again.');
+        setError('Request timed out - Server took too long to respond');
+      } else {
+        toast.error(err instanceof Error ? err.message : 'An unexpected error occurred');
+        setError('Login failed - Please try again');
+      }
     } finally {
       setLoading(false);
     }

@@ -96,16 +96,35 @@ export default function PackagesPage() {
 
   const fetchPackages = async () => {
     try {
-      const response = await fetch('/api/packages');
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('https://maple-server-e7ye.onrender.com/api/packages', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+      // Add response status check
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
+      
       if (data.success) {
         setPackages(data.data);
       } else {
-        toast.error("Failed to fetch packages");
+        toast.error(data.message || "Failed to fetch packages");
       }
     } catch (err) {
       console.error('Error fetching packages:', err);
-      toast.error('Failed to fetch packages');
+      if (err instanceof SyntaxError) {
+        toast.error('Invalid response from server. Please try again later.');
+      } else {
+        toast.error('Failed to fetch packages. Please check your connection.');
+      }
     } finally {
       setLoading(false);
     }

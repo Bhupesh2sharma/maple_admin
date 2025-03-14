@@ -100,31 +100,31 @@ export default function AdminDashboard() {
       const token = localStorage.getItem("adminToken");
       
       // Fetch packages
-      const packagesResponse = await fetch("http://localhost:3000/api/packages", {
+      const packagesResponse = await fetch("https://maple-server-e7ye.onrender.com/api/packages", {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const packagesData = await packagesResponse.json();
       
       // Fetch users
-      const usersResponse = await fetch("http://localhost:3000/api/user", {
+      const usersResponse = await fetch("https://maple-server-e7ye.onrender.com/api/user", {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const usersData = await usersResponse.json();
 
       // Fetch testimonials
-      const testimonialsResponse = await fetch("http://localhost:3000/api/testimonials", {
+      const testimonialsResponse = await fetch("https://maple-server-e7ye.onrender.com/api/testimonials", {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const testimonialsData = await testimonialsResponse.json();
 
       // Fetch contacts
-      const contactsResponse = await fetch("http://localhost:3000/api/contacts", {
+      const contactsResponse = await fetch("https://maple-server-e7ye.onrender.com/api/contacts", {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const contactsData = await contactsResponse.json();
 
       // Fetch bookings
-      const bookingsResponse = await fetch("http://localhost:3000/api/bookings", {
+      const bookingsResponse = await fetch("https://maple-server-e7ye.onrender.com/api/bookings", {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const bookingsData = await bookingsResponse.json();
