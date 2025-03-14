@@ -156,9 +156,15 @@ export default function PackagesPage() {
     if (!e.target.files) return;
     
     const fileArray = Array.from(e.target.files);
+    if (fileArray.length > 3) {
+      toast.error('Maximum 3 images allowed');
+      return;
+    }
+    
+    setImages(fileArray); // Update the images state
     setFormData(prev => ({
       ...prev,
-      images: [...prev.images, ...fileArray]
+      images: fileArray
     }));
   };
 
@@ -166,30 +172,90 @@ export default function PackagesPage() {
     e.preventDefault();
     
     try {
-      const formData = new FormData();
+      const token = localStorage.getItem('adminToken');
+      const submitFormData = new FormData();
       
-      // Add other form fields to formData
-      // ... 
+      // Add basic fields as a JSON string
+      const packageData = {
+        title: formData.title,
+        description: formData.description,
+        destination: formData.destination,
+        price: formData.price,
+        duration: {
+          days: formData.duration.days,
+          nights: formData.duration.days - 1
+        },
+        itinerary: formData.itinerary,
+        inclusions: formData.inclusions.filter(item => item.trim() !== ''),
+        exclusions: formData.exclusions.filter(item => item.trim() !== ''),
+        cancellationPolicy: formData.cancellationPolicy,
+        featured: formData.featured,
+        active: formData.active
+      };
 
-      // Add all images to formData
-      formData.append("images", images[0]);
+      // Append the JSON data
+      submitFormData.append('packageData', JSON.stringify(packageData));
+      
+      // Add images
+      formData.images.forEach((image) => {
+        submitFormData.append('images', image);
+      });
+      
+      // Add PDF if exists
+      if (pdfFile) {
+        submitFormData.append('pdfBrochure', pdfFile);
+      }
 
-      const response = await fetch('your-api-endpoint', {
-        method: 'POST',
-        body: formData,
+      const response = await fetch('https://maple-server-e7ye.onrender.com/api/packages', {
+        method: selectedPackage ? 'PUT' : 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: submitFormData,
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save package');
+      }
+
       const data = await response.json();
+
       if (data.success) {
-        toast.success('Package created successfully');
-        // Reset form or redirect
+        toast.success(selectedPackage ? 'Package updated successfully' : 'Package created successfully');
+        setShowForm(false);
+        setSelectedPackage(null);
+        fetchPackages();
+        // Reset form
+        setFormData({
+          title: "",
+          description: "",
+          destination: "",
+          price: { amount: 0, currency: "₹" },
+          duration: { days: 0, nights: 0 },
+          itinerary: [{ day: 1, title: "", description: "" }],
+          inclusions: [""],
+          exclusions: [""],
+          cancellationPolicy: "",
+          featured: false,
+          active: true,
+          images: []
+        });
+        setImages([]);
+        setPdfFile(null);
       } else {
-        throw new Error(data.message);
+        throw new Error(data.message || 'Failed to save package');
       }
     } catch (err) {
       console.error('Error:', err);
-      toast.error('Failed to create package');
+      toast.error(err instanceof Error ? err.message : 'Failed to save package');
     }
+  };
+
+  // Add this function to handle PDF upload
+  const handlePdfUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    setPdfFile(e.target.files[0]);
   };
 
   // Delete Package
@@ -429,15 +495,19 @@ export default function PackagesPage() {
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50">
-          <div className="h-full sm:h-auto overflow-y-auto">
-            <div className="bg-white w-full sm:max-w-2xl mx-auto sm:my-8 sm:rounded-lg">
-              <div className="p-4 sm:p-6">
-                <h2 className="text-xl sm:text-2xl font-bold mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen p-4">
+            <div className="relative bg-white w-full max-w-2xl rounded-lg shadow-xl">
+              {/* Form Header */}
+              <div className="sticky top-0 bg-white px-6 py-4 border-b">
+                <h2 className="text-xl sm:text-2xl font-bold">
                   {selectedPackage ? "Edit Package" : "Add New Package"}
                 </h2>
-                
-                <form onSubmit={handleSubmit} className="space-y-4">
+              </div>
+
+              {/* Scrollable Form Content */}
+              <div className="p-6 max-h-[70vh] overflow-y-auto">
+                <form id="packageForm" onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-4">
                     <div>
                       <label className="block mb-1">Title</label>
@@ -573,27 +643,125 @@ export default function PackagesPage() {
                         type="file"
                         name="pdfBrochure"
                         accept=".pdf"
+                        onChange={handlePdfUpload}
                         className="w-full p-2 border rounded"
                       />
                     </div>
-                  </div>
 
-                  <div className="flex justify-end space-x-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setShowForm(false);
-                        setSelectedPackage(null);
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="submit">
-                      {selectedPackage ? "Update" : "Create"} Package
-                    </Button>
+                    <div>
+                      <label className="block mb-1">Inclusions</label>
+                      <div className="space-y-2">
+                        {formData.inclusions.map((inclusion, index) => (
+                          <div key={index} className="flex gap-2">
+                            <input
+                              type="text"
+                              value={inclusion}
+                              onChange={(e) => {
+                                const newInclusions = [...formData.inclusions];
+                                newInclusions[index] = e.target.value;
+                                setFormData({ ...formData, inclusions: newInclusions });
+                              }}
+                              className="w-full p-2 border rounded"
+                              required
+                            />
+                            {index > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newInclusions = formData.inclusions.filter((_, i) => i !== index);
+                                  setFormData({ ...formData, inclusions: newInclusions });
+                                }}
+                                className="text-red-600"
+                              >
+                                Remove
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, inclusions: [...formData.inclusions, ""] })}
+                          className="text-blue-600"
+                        >
+                          + Add Inclusion
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block mb-1">Exclusions</label>
+                      <div className="space-y-2">
+                        {formData.exclusions.map((exclusion, index) => (
+                          <div key={index} className="flex gap-2">
+                            <input
+                              type="text"
+                              value={exclusion}
+                              onChange={(e) => {
+                                const newExclusions = [...formData.exclusions];
+                                newExclusions[index] = e.target.value;
+                                setFormData({ ...formData, exclusions: newExclusions });
+                              }}
+                              className="w-full p-2 border rounded"
+                              required
+                            />
+                            {index > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newExclusions = formData.exclusions.filter((_, i) => i !== index);
+                                  setFormData({ ...formData, exclusions: newExclusions });
+                                }}
+                                className="text-red-600"
+                              >
+                                Remove
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, exclusions: [...formData.exclusions, ""] })}
+                          className="text-blue-600"
+                        >
+                          + Add Exclusion
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block mb-1">Cancellation Policy</label>
+                      <textarea
+                        value={formData.cancellationPolicy}
+                        onChange={(e) => setFormData({ ...formData, cancellationPolicy: e.target.value })}
+                        className="w-full p-2 border rounded"
+                        required
+                      />
+                    </div>
                   </div>
                 </form>
+              </div>
+
+              {/* Form Footer */}
+              <div className="sticky bottom-0 bg-white px-6 py-4 border-t">
+                <div className="flex justify-end gap-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setShowForm(false);
+                      setSelectedPackage(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit"
+                    form="packageForm"
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    {selectedPackage ? "Update" : "Create"} Package
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
