@@ -75,52 +75,56 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Settings</h1>
+    <div className="space-y-4 p-2 sm:p-6">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <h1 className="text-xl sm:text-3xl font-bold mt-14">Settings</h1>
         <Button 
           variant="destructive" 
           onClick={handleLogout}
-          className="flex items-center gap-2"
+          className="w-full sm:w-auto flex items-center justify-center gap-2"
         >
           <LogOut className="h-4 w-4" />
           Logout
         </Button>
       </div>
 
+      {/* Tabs Section */}
       <Tabs defaultValue="general" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="appearance">Appearance</TabsTrigger>
+        <TabsList className="w-full flex overflow-x-auto">
+          <TabsTrigger value="general" className="flex-1">General</TabsTrigger>
+          <TabsTrigger value="notifications" className="flex-1">Notifications</TabsTrigger>
+          <TabsTrigger value="security" className="flex-1">Security</TabsTrigger>
+          <TabsTrigger value="appearance" className="flex-1">Appearance</TabsTrigger>
         </TabsList>
 
+        {/* General Settings Tab */}
         <TabsContent value="general">
-          <Card>
-            <CardHeader>
-              <CardTitle>General Settings</CardTitle>
-              <CardDescription>
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl">General Settings</CardTitle>
+              <CardDescription className="text-sm">
                 Manage your basic admin settings and preferences
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="p-4 sm:p-6 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="adminEmail">Admin Email</Label>
+                <Label htmlFor="adminEmail" className="text-sm font-medium">Admin Email</Label>
                 <Input
                   id="adminEmail"
                   type="email"
                   value={settings.adminEmail}
                   onChange={(e) => setSettings({ ...settings, adminEmail: e.target.value })}
+                  className="w-full"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="language">Language</Label>
+                <Label htmlFor="language" className="text-sm font-medium">Language</Label>
                 <select
                   id="language"
-                  className="w-full p-2 border rounded-md"
+                  className="w-full p-2 border rounded-md text-sm"
                   value={settings.language}
                   onChange={(e) => setSettings({ ...settings, language: e.target.value })}
                 >
@@ -131,6 +135,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="autoLogout" className="text-sm font-medium">Auto Logout (minutes)</Label>
                 <Label htmlFor="autoLogout">Auto Logout (minutes)</Label>
                 <Input
                   id="autoLogout"

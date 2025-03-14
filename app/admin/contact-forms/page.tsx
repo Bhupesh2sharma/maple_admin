@@ -83,12 +83,13 @@ export default function ContactFormsPage() {
   };
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Contact Form Submissions</h1>
+    <div className="space-y-4 p-2 sm:p-6">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <h1 className="text-xl sm:text-3xl font-bold mt-12">Contact Form Submissions</h1>
         <button
           onClick={() => fetchContacts()}
-          className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark"
+          className="w-full sm:w-auto bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark"
         >
           Refresh
         </button>
@@ -97,56 +98,138 @@ export default function ContactFormsPage() {
       {loading ? (
         <div className="text-center py-4">Loading submissions...</div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Message</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {contacts.map((contact) => (
-                <TableRow key={contact._id}>
-                  <TableCell>{contact.firstName} {contact.lastName}</TableCell>
-                  <TableCell>{contact.email}</TableCell>
-                  <TableCell>{contact.phone}</TableCell>
-                  <TableCell>{contact.message}</TableCell>
-                  <TableCell>{format(new Date(contact.createdAt), 'MMM dd, yyyy')}</TableCell>
-                  <TableCell>
-                    <select
-                      value={contact.status}
-                      onChange={(e) => {
-                        const status = e.target.value;
-                        const nextStatus = {
-                          new: 'read',
-                          read: 'responded',
-                          responded: 'new'
-                        }[status as keyof typeof nextStatus];
-                        handleStatusUpdate(contact._id, nextStatus);
-                      }}
-                    >
-                      <option value={contact.status}>
-                        {contact.status.charAt(0).toUpperCase() + contact.status.slice(1)}
-                      </option>
-                    </select>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {contacts.length === 0 && (
+        <>
+          {/* Mobile View */}
+          <div className="block sm:hidden">
+            {contacts.length > 0 ? (
+              <div className="space-y-4">
+                {contacts.map((contact) => (
+                  <div key={contact._id} className="bg-white rounded-lg shadow p-4 space-y-3">
+                    {/* Contact Header */}
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="font-semibold">
+                          {contact.firstName} {contact.lastName}
+                        </div>
+                        <div className="text-sm text-gray-600">{format(new Date(contact.createdAt), 'MMM dd, yyyy')}</div>
+                      </div>
+                      <select
+                        value={contact.status}
+                        onChange={(e) => {
+                          const status = e.target.value;
+                          const nextStatus = {
+                            new: 'read',
+                            read: 'responded',
+                            responded: 'new'
+                          }[status as keyof typeof nextStatus];
+                          handleStatusUpdate(contact._id, nextStatus);
+                        }}
+                        className="text-xs border rounded-md px-2 py-1"
+                      >
+                        <option value={contact.status}>
+                          {contact.status.charAt(0).toUpperCase() + contact.status.slice(1)}
+                        </option>
+                      </select>
+                    </div>
+
+                    {/* Contact Details */}
+                    <div className="grid gap-2 text-sm">
+                      <div className="grid grid-cols-3">
+                        <div className="text-gray-600">Email:</div>
+                        <div className="col-span-2 break-all">
+                          <a href={`mailto:${contact.email}`} className="text-blue-600">
+                            {contact.email}
+                          </a>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3">
+                        <div className="text-gray-600">Phone:</div>
+                        <div className="col-span-2">
+                          <a href={`tel:${contact.phone}`} className="text-blue-600">
+                            {contact.phone}
+                          </a>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="text-gray-600">Message:</div>
+                        <div className="bg-gray-50 p-3 rounded-md text-gray-700">
+                          {contact.message}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-white rounded-lg">
+                No contact form submissions found.
+              </div>
+            )}
+          </div>
+
+          {/* Desktop View */}
+          <div className="hidden sm:block bg-white rounded-lg shadow overflow-hidden">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
-                    No contact form submissions found.
-                  </TableCell>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Message</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {contacts.map((contact) => (
+                  <TableRow key={contact._id}>
+                    <TableCell>{contact.firstName} {contact.lastName}</TableCell>
+                    <TableCell>
+                      <a href={`mailto:${contact.email}`} className="text-blue-600">
+                        {contact.email}
+                      </a>
+                    </TableCell>
+                    <TableCell>
+                      <a href={`tel:${contact.phone}`} className="text-blue-600">
+                        {contact.phone}
+                      </a>
+                    </TableCell>
+                    <TableCell className="max-w-xs truncate">{contact.message}</TableCell>
+                    <TableCell>{format(new Date(contact.createdAt), 'MMM dd, yyyy')}</TableCell>
+                    <TableCell>
+                      <select
+                        value={contact.status}
+                        onChange={(e) => {
+                          const status = e.target.value;
+                          const nextStatus = {
+                            new: 'read',
+                            read: 'responded',
+                            responded: 'new'
+                          }[status as keyof typeof nextStatus];
+                          handleStatusUpdate(contact._id, nextStatus);
+                        }}
+                        className="border rounded-md px-2 py-1"
+                      >
+                        <option value={contact.status}>
+                          {contact.status.charAt(0).toUpperCase() + contact.status.slice(1)}
+                        </option>
+                      </select>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {contacts.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-4">
+                      No contact form submissions found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </>
       )}
     </div>
   );

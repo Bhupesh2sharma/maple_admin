@@ -117,12 +117,13 @@ export default function BookingsPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Bookings Management</h1>
-        <div className="flex gap-2">
+    <div className="space-y-4 p-2 sm:p-6">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <h1 className="text-xl sm:text-3xl font-bold mt-12">Bookings Management</h1>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <select
-            className="border rounded-md px-3 py-2"
+            className="border rounded-md px-3 py-2 w-full sm:w-auto"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
           >
@@ -133,14 +134,93 @@ export default function BookingsPage() {
           </select>
           <button
             onClick={() => fetchBookings()}
-            className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark"
+            className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark w-full sm:w-auto"
           >
             Refresh
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow">
+      {/* Mobile View */}
+      <div className="block sm:hidden ">
+        {filteredBookings.length > 0 ? (
+          <div className="space-y-4">
+            {filteredBookings.map((booking) => (
+              <div key={booking._id} className="bg-white rounded-lg shadow p-4 space-y-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="font-semibold">Booking #{booking._id.slice(-6)}</div>
+                    <div className="text-sm text-gray-600">{booking.package.title}</div>
+                  </div>
+                  <div className="flex gap-1">
+                    {getStatusBadge(booking.bookingStatus)}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="text-gray-600">Travel Date:</div>
+                  <div>{new Date(booking.startDate).toLocaleDateString()}</div>
+
+                  <div className="text-gray-600">Guests:</div>
+                  <div>
+                    {booking.numberOfPeople.adults} Adults
+                    {booking.numberOfPeople.children > 0 && `, ${booking.numberOfPeople.children} Children`}
+                  </div>
+
+                  <div className="text-gray-600">Contact:</div>
+                  <div>
+                    <div>{booking.contactDetails.email}</div>
+                    <div>{booking.contactDetails.phone}</div>
+                    {booking.contactDetails.alternatePhone && (
+                      <div>{booking.contactDetails.alternatePhone}</div>
+                    )}
+                  </div>
+
+                  <div className="text-gray-600">Amount:</div>
+                  <div className="font-semibold">₹{booking.totalAmount.toLocaleString()}</div>
+
+                  <div className="text-gray-600">Payment:</div>
+                  <div>{getStatusBadge(booking.paymentStatus)}</div>
+                </div>
+
+                <div className="flex gap-2 pt-2 border-t">
+                  {booking.bookingStatus === 'pending' && (
+                    <>
+                      <button
+                        onClick={() => updateBookingStatus(booking._id, 'confirmed')}
+                        className="flex-1 text-xs bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+                      >
+                        Confirm
+                      </button>
+                      <button
+                        onClick={() => updateBookingStatus(booking._id, 'cancelled')}
+                        className="flex-1 text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={() => {
+                      // Add view details functionality
+                    }}
+                    className="flex-1 text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                  >
+                    View Details
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 bg-white rounded-lg">
+            No bookings found.
+          </div>
+        )}
+      </div>
+
+      {/* Desktop View */}
+      <div className="hidden sm:block bg-white rounded-lg shadow">
         <Table>
           <TableHeader>
             <TableRow>
@@ -150,8 +230,8 @@ export default function BookingsPage() {
               <TableHead>Guests</TableHead>
               <TableHead>Contact</TableHead>
               <TableHead>Amount</TableHead>
-              <TableHead>Booking Status</TableHead>
-              <TableHead>Payment Status</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Payment</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -167,9 +247,12 @@ export default function BookingsPage() {
                     {booking.numberOfPeople.children > 0 && `, ${booking.numberOfPeople.children} Children`}
                   </TableCell>
                   <TableCell>
-                    <div>
-                      <div>{booking.contactDetails.email}</div>
+                    <div className="space-y-1">
+                      <div className="text-sm">{booking.contactDetails.email}</div>
                       <div className="text-sm text-gray-500">{booking.contactDetails.phone}</div>
+                      {booking.contactDetails.alternatePhone && (
+                        <div className="text-sm text-gray-500">{booking.contactDetails.alternatePhone}</div>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>₹{booking.totalAmount.toLocaleString()}</TableCell>

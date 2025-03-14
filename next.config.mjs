@@ -11,9 +11,8 @@ const nextConfig = {
         {
           protocol: 'https',
           hostname: 'maple-server-e7ye.onrender.com',
-          port: '',
           pathname: '/uploads/**',
-        },
+        }
       ],
     },
     eslint: {

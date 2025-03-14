@@ -248,18 +248,79 @@ export default function PackagesPage() {
     }));
   };
 
-  const PackageCards = () => {
-    return (
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-6">Package Gallery</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  return (
+    <div className="p-2 sm:p-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+        <h1 className="text-lg sm:text-3xl font-bold px-1 mt-12">Tour Packages</h1>
+        <Button 
+          onClick={() => setShowForm(true)}
+          className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-sm sm:text-base"
+        >
+          <Plus className="mr-2 h-4 w-4" /> Add Package
+        </Button>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-4">Loading packages...</div>
+      ) : (
+        <div className="overflow-x-auto -mx-2 sm:mx-0">
+          <div className="min-w-full inline-block align-middle">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="whitespace-nowrap text-xs sm:text-sm">Title</TableHead>
+                  <TableHead className="whitespace-nowrap text-xs sm:text-sm hidden sm:table-cell">Destination</TableHead>
+                  <TableHead className="whitespace-nowrap text-xs sm:text-sm">Price</TableHead>
+                  <TableHead className="whitespace-nowrap text-xs sm:text-sm hidden sm:table-cell">Duration</TableHead>
+                  <TableHead className="whitespace-nowrap text-xs sm:text-sm">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {packages.map((pkg) => (
+                  <TableRow key={pkg._id}>
+                    <TableCell className="whitespace-nowrap text-xs sm:text-sm">{pkg.title}</TableCell>
+                    <TableCell className="whitespace-nowrap text-xs sm:text-sm hidden sm:table-cell">{pkg.destination}</TableCell>
+                    <TableCell className="whitespace-nowrap text-xs sm:text-sm">{pkg.price.currency} {pkg.price.amount}</TableCell>
+                    <TableCell className="whitespace-nowrap text-xs sm:text-sm hidden sm:table-cell">{pkg.duration.days} days</TableCell>
+                    <TableCell>
+                      <div className="flex gap-1 sm:gap-2">
+                        <Button
+                          onClick={() => {
+                            editPackage(pkg);
+                            setShowForm(true);
+                          }}
+                          size="sm"
+                          className="bg-blue-600 hover:bg-blue-700 p-1 sm:p-2"
+                        >
+                          <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                        </Button>
+                        <Button
+                          onClick={() => handleDelete(pkg._id)}
+                          size="sm"
+                          className="bg-red-600 hover:bg-red-700 p-1 sm:p-2"
+                        >
+                          <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
+
+      <div className="mt-6 sm:mt-8">
+        <h2 className="text-lg sm:text-2xl font-bold mb-3 sm:mb-4 px-1">Package Gallery</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {packages.map((pkg) => (
             <div key={pkg._id} className="bg-white rounded-lg shadow-lg overflow-hidden">
-              <div className="relative h-64">
+              <div className="relative h-48 sm:h-64">
                 {pkg.images && pkg.images.length > 0 ? (
                   <Carousel>
                     {pkg.images.map((image, index) => (
-                      <div key={index} className="relative w-full h-64 flex-shrink-0">
+                      <div key={index} className="relative w-full h-48 sm:h-64 flex-shrink-0">
                         <Image
                           src={`https://maple-server-e7ye.onrender.com${image.url}`}
                           alt={image.caption || pkg.title}
@@ -271,37 +332,39 @@ export default function PackagesPage() {
                     ))}
                   </Carousel>
                 ) : (
-                  <div className="h-64 bg-gray-200 flex items-center justify-center">
-                    <p className="text-gray-500">No images available</p>
+                  <div className="h-48 sm:h-64 bg-gray-200 flex items-center justify-center">
+                    <p className="text-gray-500 text-sm">No images available</p>
                   </div>
                 )}
               </div>
 
-              <div className="p-6 space-y-4">
-                <h3 className="text-xl font-bold text-gray-900">{pkg.title}</h3>
+              <div className="p-3 sm:p-6 space-y-3 sm:space-y-4">
+                <h3 className="text-base sm:text-xl font-bold text-gray-900">{pkg.title}</h3>
                 
-                <div className="flex justify-between items-center">
-                  <div className="text-gray-600">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                  <div className="text-sm sm:text-base text-gray-600">
                     <p>{pkg.destination}</p>
                     <p>{pkg.duration.days} Days | {pkg.duration.nights} Nights</p>
                   </div>
-                  <div className="text-xl font-bold text-green-600">
+                  <div className="text-lg sm:text-xl font-bold text-green-600">
                     {pkg.price.currency}{pkg.price.amount}
                   </div>
                 </div>
 
-                <p className="text-gray-600 line-clamp-3">{pkg.description}</p>
+                <p className="text-sm sm:text-base text-gray-600 line-clamp-2 sm:line-clamp-3">{pkg.description}</p>
 
                 <div className="space-y-2">
-                  <h4 className="font-semibold text-gray-900">Itinerary Highlights:</h4>
+                  <h4 className="text-sm sm:text-base font-semibold text-gray-900">Itinerary Highlights:</h4>
                   <div className="space-y-1">
-                    {pkg.itinerary.slice(0, 3).map((day, index) => (
-                      <p key={index} className="text-sm text-gray-600">
+                    {pkg.itinerary.slice(0, 2).map((day, index) => (
+                      <p key={index} className="text-xs sm:text-sm text-gray-600">
                         <span className="font-medium">Day {day.day}:</span> {day.title}
                       </p>
                     ))}
-                    {pkg.itinerary.length > 3 && (
-                      <p className="text-sm text-blue-600">+ {pkg.itinerary.length - 3} more days</p>
+                    {pkg.itinerary.length > 2 && (
+                      <p className="text-xs sm:text-sm text-blue-600">
+                        + {pkg.itinerary.length - 2} more days
+                      </p>
                     )}
                   </div>
                 </div>
@@ -364,237 +427,178 @@ export default function PackagesPage() {
           ))}
         </div>
       </div>
-    );
-  };
-
-  return (
-    <div className="space-y-6 p-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Tour Packages</h1>
-        <Button 
-          onClick={() => setShowForm(true)}
-          className="bg-green-600 hover:bg-green-700"
-        >
-          <Plus className="mr-2 h-4 w-4" /> Add Package
-        </Button>
-      </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-4">
-              {selectedPackage ? "Edit Package" : "Add New Package"}
-            </h2>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-4">
-                <div>
-                  <label className="block mb-1">Title</label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full p-2 border rounded"
-                    required
-                  />
-                </div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50">
+          <div className="h-full sm:h-auto overflow-y-auto">
+            <div className="bg-white w-full sm:max-w-2xl mx-auto sm:my-8 sm:rounded-lg">
+              <div className="p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4">
+                  {selectedPackage ? "Edit Package" : "Add New Package"}
+                </h2>
+                
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block mb-1">Title</label>
+                      <input
+                        type="text"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        className="w-full p-2 border rounded"
+                        required
+                      />
+                    </div>
 
-                <div>
-                  <label className="block mb-1">Description</label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full p-2 border rounded"
-                    required
-                  />
-                </div>
+                    <div>
+                      <label className="block mb-1">Description</label>
+                      <textarea
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        className="w-full p-2 border rounded"
+                        required
+                      />
+                    </div>
 
-                <div>
-                  <label className="block mb-1">Destination</label>
-                  <input
-                    type="text"
-                    value={formData.destination}
-                    onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
-                    className="w-full p-2 border rounded"
-                    required
-                  />
-                </div>
+                    <div>
+                      <label className="block mb-1">Destination</label>
+                      <input
+                        type="text"
+                        value={formData.destination}
+                        onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
+                        className="w-full p-2 border rounded"
+                        required
+                      />
+                    </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block mb-1">Price</label>
-                    <input
-                      type="number"
-                      value={formData.price.amount}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        price: { ...formData.price, amount: Number(e.target.value) }
-                      })}
-                      className="w-full p-2 border rounded"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-1">Days</label>
-                    <input
-                      type="number"
-                      value={formData.duration.days}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        duration: { ...formData.duration, days: Number(e.target.value) }
-                      })}
-                      className="w-full p-2 border rounded"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <label className="block font-bold">Itinerary</label>
-                  {formData.itinerary.map((day, index) => (
-                    <div key={index} className="grid grid-cols-2 gap-4 p-4 border rounded">
+                    <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block mb-1">Day {day.day} Title</label>
+                        <label className="block mb-1">Price</label>
                         <input
-                          type="text"
-                          value={day.title}
-                          onChange={(e) => handleItineraryChange(index, 'title', e.target.value)}
+                          type="number"
+                          value={formData.price.amount}
+                          onChange={(e) => setFormData({
+                            ...formData,
+                            price: { ...formData.price, amount: Number(e.target.value) }
+                          })}
                           className="w-full p-2 border rounded"
                           required
                         />
                       </div>
                       <div>
-                        <label className="block mb-1">Description</label>
-                        <textarea
-                          value={day.description}
-                          onChange={(e) => handleItineraryChange(index, 'description', e.target.value)}
+                        <label className="block mb-1">Days</label>
+                        <input
+                          type="number"
+                          value={formData.duration.days}
+                          onChange={(e) => setFormData({
+                            ...formData,
+                            duration: { ...formData.duration, days: Number(e.target.value) }
+                          })}
                           className="w-full p-2 border rounded"
                           required
                         />
                       </div>
                     </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={addItineraryDay}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    + Add Day
-                  </button>
-                </div>
 
-                <div className="space-y-4">
-                  <label className="block mb-1">Images (Max 3)</label>
-                  <input
-                    type="file"
-                    name="images"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="w-full p-2 border rounded"
-                  />
-                </div>
-
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                  {images.map((image, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={URL.createObjectURL(image)}
-                        alt={`Preview ${index + 1}`}
-                        className="w-full h-32 object-cover rounded"
-                      />
+                    <div className="space-y-4">
+                      <label className="block font-bold">Itinerary</label>
+                      {formData.itinerary.map((day, index) => (
+                        <div key={index} className="grid grid-cols-2 gap-4 p-4 border rounded">
+                          <div>
+                            <label className="block mb-1">Day {day.day} Title</label>
+                            <input
+                              type="text"
+                              value={day.title}
+                              onChange={(e) => handleItineraryChange(index, 'title', e.target.value)}
+                              className="w-full p-2 border rounded"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block mb-1">Description</label>
+                            <textarea
+                              value={day.description}
+                              onChange={(e) => handleItineraryChange(index, 'description', e.target.value)}
+                              className="w-full p-2 border rounded"
+                              required
+                            />
+                          </div>
+                        </div>
+                      ))}
                       <button
                         type="button"
-                        onClick={() => {
-                          setImages(images.filter((_, i) => i !== index));
-                        }}
-                        className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
+                        onClick={addItineraryDay}
+                        className="text-blue-600 hover:text-blue-800"
                       >
-                        ×
+                        + Add Day
                       </button>
                     </div>
-                  ))}
-                </div>
 
-                <div>
-                  <label className="block mb-1">PDF Brochure</label>
-                  <input
-                    type="file"
-                    name="pdfBrochure"
-                    accept=".pdf"
-                    className="w-full p-2 border rounded"
-                  />
-                </div>
-              </div>
+                    <div className="space-y-4">
+                      <label className="block mb-1">Images (Max 3)</label>
+                      <input
+                        type="file"
+                        name="images"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
 
-              <div className="flex justify-end space-x-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setShowForm(false);
-                    setSelectedPackage(null);
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  {selectedPackage ? "Update" : "Create"} Package
-                </Button>
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      {images.map((image, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={URL.createObjectURL(image)}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-32 object-cover rounded"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setImages(images.filter((_, i) => i !== index));
+                            }}
+                            className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div>
+                      <label className="block mb-1">PDF Brochure</label>
+                      <input
+                        type="file"
+                        name="pdfBrochure"
+                        accept=".pdf"
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end space-x-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setShowForm(false);
+                        setSelectedPackage(null);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit">
+                      {selectedPackage ? "Update" : "Create"} Package
+                    </Button>
+                  </div>
+                </form>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
-
-      {loading ? (
-        <div className="text-center py-4">Loading packages...</div>
-      ) : (
-      <Table>
-        <TableHeader>
-          <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Destination</TableHead>
-            <TableHead>Price</TableHead>
-              <TableHead>Duration</TableHead>
-              <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {packages.map((pkg) => (
-            <TableRow key={pkg._id}>
-              <TableCell>{pkg.title}</TableCell>
-                <TableCell>{pkg.destination}</TableCell>
-                <TableCell>{pkg.price.currency} {pkg.price.amount}</TableCell>
-                <TableCell>{pkg.duration.days} days</TableCell>
-                <TableCell>
-                  <div className="flex space-x-2">
-                    <Button
-                      onClick={() => {
-                        editPackage(pkg);
-                        setShowForm(true);
-                      }}
-                      size="sm"
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      onClick={() => handleDelete(pkg._id)}
-                      size="sm"
-                      className="bg-red-600 hover:bg-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      )}
-
-      <PackageCards />
     </div>
   );
 }
