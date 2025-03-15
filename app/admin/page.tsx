@@ -469,7 +469,9 @@ export default function AdminDashboard() {
               {stats.recentBookings.map((booking) => (
                 <div key={booking._id} className="flex justify-between items-center border-b pb-2">
                   <div>
-                    <p className="font-medium">{booking.package.title}</p>
+                    <p className="font-medium">
+                      {booking.package?.title || 'Package Unavailable'}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {new Date(booking.startDate).toLocaleDateString()}
                     </p>

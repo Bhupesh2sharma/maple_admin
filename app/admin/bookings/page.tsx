@@ -150,37 +150,28 @@ export default function BookingsPage() {
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="font-semibold">Booking #{booking._id.slice(-6)}</div>
-                    <div className="text-sm text-gray-600">{booking.package.title}</div>
+                    <div className="text-sm text-gray-600">{booking.package?.title || 'Package Unavailable'}</div>
                   </div>
                   <div className="flex gap-1">
                     {getStatusBadge(booking.bookingStatus)}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div className="text-gray-600">Travel Date:</div>
-                  <div>{new Date(booking.startDate).toLocaleDateString()}</div>
-
-                  <div className="text-gray-600">Guests:</div>
+                <div className="mt-2 text-sm text-gray-600">
                   <div>
-                    {booking.numberOfPeople.adults} Adults
-                    {booking.numberOfPeople.children > 0 && `, ${booking.numberOfPeople.children} Children`}
+                    Booking Date: {new Date(booking.createdAt).toLocaleDateString()}
                   </div>
-
-                  <div className="text-gray-600">Contact:</div>
                   <div>
-                    <div>{booking.contactDetails.email}</div>
-                    <div>{booking.contactDetails.phone}</div>
-                    {booking.contactDetails.alternatePhone && (
-                      <div>{booking.contactDetails.alternatePhone}</div>
-                    )}
+                    Travel Date: {new Date(booking.startDate).toLocaleDateString()}
                   </div>
-
-                  <div className="text-gray-600">Amount:</div>
-                  <div className="font-semibold">₹{booking.totalAmount.toLocaleString()}</div>
-
-                  <div className="text-gray-600">Payment:</div>
-                  <div>{getStatusBadge(booking.paymentStatus)}</div>
+                  <div>
+                    Guests: {booking.numberOfPeople.adults} Adults, {booking.numberOfPeople.children} Children
+                  </div>
+                  {booking.totalAmount && (
+                    <div>
+                      Amount: ₹{booking.totalAmount.toLocaleString()}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-2 pt-2 border-t">
@@ -240,11 +231,10 @@ export default function BookingsPage() {
               filteredBookings.map((booking) => (
                 <TableRow key={booking._id}>
                   <TableCell className="font-medium">{booking._id.slice(-6)}</TableCell>
-                  <TableCell>{booking.package.title}</TableCell>
+                  <TableCell>{booking.package?.title || 'Package Unavailable'}</TableCell>
                   <TableCell>{new Date(booking.startDate).toLocaleDateString()}</TableCell>
                   <TableCell>
-                    {booking.numberOfPeople.adults} Adults
-                    {booking.numberOfPeople.children > 0 && `, ${booking.numberOfPeople.children} Children`}
+                    {booking.numberOfPeople.adults} Adults, {booking.numberOfPeople.children} Children
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
