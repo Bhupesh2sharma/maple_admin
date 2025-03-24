@@ -51,7 +51,7 @@ export default function TestimonialsPage() {
   const handleApprovalUpdate = async (id: string, isApproved: boolean) => {
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await fetch(`http://localhost:3000/api/testimonials/${id}`, {
+      const response = await fetch(`https://maple-server-e7ye.onrender.com/api/testimonials/${id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -79,7 +79,7 @@ export default function TestimonialsPage() {
 
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await fetch(`http://localhost:3000/api/testimonials/${id}`, {
+      const response = await fetch(`https://maple-server-e7ye.onrender.com/api/testimonials/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
