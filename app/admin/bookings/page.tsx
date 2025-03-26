@@ -247,34 +247,7 @@ export default function BookingsPage() {
                   <TableCell>₹{booking.totalAmount.toLocaleString()}</TableCell>
                   <TableCell>{getStatusBadge(booking.bookingStatus)}</TableCell>
                   <TableCell>{getStatusBadge(booking.paymentStatus)}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      {booking.bookingStatus === 'pending' && (
-                        <>
-                          <button
-                            onClick={() => updateBookingStatus(booking._id, 'confirmed')}
-                            className="text-xs bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
-                          >
-                            Confirm
-                          </button>
-                          <button
-                            onClick={() => updateBookingStatus(booking._id, 'cancelled')}
-                            className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      )}
-                      <button
-                        onClick={() => {
-                          // Add view details functionality
-                        }}
-                        className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                      >
-                        View
-                      </button>
-                    </div>
-                  </TableCell>
+                  
                 </TableRow>
               ))
             ) : (
