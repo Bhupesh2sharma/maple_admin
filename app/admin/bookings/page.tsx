@@ -223,7 +223,6 @@ export default function BookingsPage() {
               <TableHead>Amount</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Payment</TableHead>
-              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
