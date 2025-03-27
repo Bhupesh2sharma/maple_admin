@@ -131,8 +131,8 @@ export default function PackagesPage() {
   };
 
   const editPackage = (pkg: Package) => {
-    // Convert Package to PackageFormData format
-    const formData: PackageFormData = {
+    setSelectedPackage(pkg);
+    setFormData({
       title: pkg.title,
       description: pkg.description,
       destination: pkg.destination,
@@ -144,12 +144,10 @@ export default function PackagesPage() {
       cancellationPolicy: pkg.cancellationPolicy,
       featured: pkg.featured,
       active: pkg.active,
-      images: [] // Reset images array since we can't convert URLs to Files
-    };
-    
-    setFormData(formData); // Now this should work without type errors
-    // Set any other state needed for editing mode
-    setSelectedPackage(pkg);
+      images: [] // Reset images as we'll need to re-upload them
+    });
+    setImages([]);
+    setPdfFile(null);
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,15 +166,15 @@ export default function PackagesPage() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
       const token = localStorage.getItem('adminToken');
       const submitFormData = new FormData();
       
-      // Add basic fields as a JSON string
       const packageData = {
+        _id: selectedPackage?._id, // Include the package ID for updates
         title: formData.title,
         description: formData.description,
         destination: formData.destination,
@@ -193,20 +191,21 @@ export default function PackagesPage() {
         active: formData.active
       };
 
-      // Append the JSON data
       submitFormData.append('packageData', JSON.stringify(packageData));
       
-      // Add images
       formData.images.forEach((image) => {
         submitFormData.append('images', image);
       });
       
-      // Add PDF if exists
       if (pdfFile) {
         submitFormData.append('pdfBrochure', pdfFile);
       }
 
-      const response = await fetch('https://maple-server-e7ye.onrender.com/api/packages', {
+      const url = selectedPackage 
+        ? `https://maple-server-e7ye.onrender.com/api/packages/${selectedPackage._id}` // Include package ID in URL for updates
+        : 'https://maple-server-e7ye.onrender.com/api/packages';
+
+      const response = await fetch(url, {
         method: selectedPackage ? 'PUT' : 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
