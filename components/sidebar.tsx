@@ -10,7 +10,8 @@ import {
   Users,
   MessageSquareQuote,
   Menu,
-  X
+  X,
+  Calendar // Add Calendar icon
 } from "lucide-react"
 import { useState, useEffect } from "react";
 
@@ -73,6 +74,19 @@ export function Sidebar({ isMobile }: SidebarProps) {
             <BookOpen className="mr-3" />
             Bookings
           </Link>
+
+          {/* Add Calendar Link */}
+          <a
+            href="https://v0-modern-admin-calendar-design-ngzxeh.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center px-6 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+            onClick={() => isMobile && setIsOpen(false)}
+          >
+            <Calendar className="mr-3" />
+            Calendar
+          </a>
+
           <Link 
             href="/admin/contact-forms" 
             className="flex items-center px-6 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
